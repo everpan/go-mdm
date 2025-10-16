@@ -39,6 +39,12 @@ func (p *PK) FromString(content string) error {
 	return dec.Decode(p)
 }
 
+const epsilon = 1e-12
+
+func isZeroStrict(f64 float64) bool {
+	return f64 < epsilon && f64 > -epsilon
+}
+
 // isZero determines whether v is zero-like (simplified utils.IsZero)
 func isZero(v interface{}) bool {
 	switch x := v.(type) {
@@ -61,9 +67,9 @@ func isZero(v interface{}) bool {
 	case uint, uint8, uint16, uint32, uint64:
 		return reflect.ValueOf(v).Uint() == 0
 	case float32:
-		return x == 0
+		return isZeroStrict(float64(x))
 	case float64:
-		return x == 0
+		return isZeroStrict(x)
 	}
 	return false
 }

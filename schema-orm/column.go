@@ -15,35 +15,35 @@ const (
 )
 
 // Column mirrors xorm.io/xorm/schemas.Column with JSON/YAML tags
-// and same field names/types.
+// and the same field names /types.
 type Column struct {
-	Name            string       `json:"name" yaml:"name"`
-	TableName       string       `json:"tableName" yaml:"tableName"`
-	FieldName       string       `json:"fieldName" yaml:"fieldName"`
-	FieldIndex      []int        `json:"fieldIndex" yaml:"fieldIndex"`
-	SQLType         SQLType      `json:"sqlType" yaml:"sqlType"`
-	IsJSON          bool         `json:"isJSON" yaml:"isJSON"`
-	IsJSONB         bool         `json:"isJSONB" yaml:"isJSONB"`
-	Length          int64        `json:"length" yaml:"length"`
-	Length2         int64        `json:"length2" yaml:"length2"`
-	Nullable        bool         `json:"nullable" yaml:"nullable"`
-	Default         string       `json:"default" yaml:"default"`
+	Name            string         `json:"name" yaml:"name"`
+	TableName       string         `json:"tableName" yaml:"tableName"`
+	FieldName       string         `json:"fieldName" yaml:"fieldName"`
+	FieldIndex      []int          `json:"fieldIndex" yaml:"fieldIndex"`
+	SQLType         SQLType        `json:"sqlType" yaml:"sqlType"`
+	IsJSON          bool           `json:"isJSON" yaml:"isJSON"`
+	IsJSONB         bool           `json:"isJSONB" yaml:"isJSONB"`
+	Length          int64          `json:"length" yaml:"length"`
+	Length2         int64          `json:"length2" yaml:"length2"`
+	Nullable        bool           `json:"nullable" yaml:"nullable"`
+	Default         string         `json:"default" yaml:"default"`
 	Indexes         map[string]int `json:"indexes" yaml:"indexes"`
-	IsPrimaryKey    bool         `json:"isPrimaryKey" yaml:"isPrimaryKey"`
-	IsAutoIncrement bool         `json:"isAutoIncrement" yaml:"isAutoIncrement"`
-	MapType         int          `json:"mapType" yaml:"mapType"`
-	IsCreated       bool         `json:"isCreated" yaml:"isCreated"`
-	IsUpdated       bool         `json:"isUpdated" yaml:"isUpdated"`
-	IsDeleted       bool         `json:"isDeleted" yaml:"isDeleted"`
-	IsCascade       bool         `json:"isCascade" yaml:"isCascade"`
-	IsVersion       bool         `json:"isVersion" yaml:"isVersion"`
-	DefaultIsEmpty  bool         `json:"defaultIsEmpty" yaml:"defaultIsEmpty"`
+	IsPrimaryKey    bool           `json:"isPrimaryKey" yaml:"isPrimaryKey"`
+	IsAutoIncrement bool           `json:"isAutoIncrement" yaml:"isAutoIncrement"`
+	MapType         int            `json:"mapType" yaml:"mapType"`
+	IsCreated       bool           `json:"isCreated" yaml:"isCreated"`
+	IsUpdated       bool           `json:"isUpdated" yaml:"isUpdated"`
+	IsDeleted       bool           `json:"isDeleted" yaml:"isDeleted"`
+	IsCascade       bool           `json:"isCascade" yaml:"isCascade"`
+	IsVersion       bool           `json:"isVersion" yaml:"isVersion"`
+	DefaultIsEmpty  bool           `json:"defaultIsEmpty" yaml:"defaultIsEmpty"`
 	EnumOptions     map[string]int `json:"enumOptions" yaml:"enumOptions"`
 	SetOptions      map[string]int `json:"setOptions" yaml:"setOptions"`
-	DisableTimeZone bool         `json:"disableTimeZone" yaml:"disableTimeZone"`
+	DisableTimeZone bool           `json:"disableTimeZone" yaml:"disableTimeZone"`
 	TimeZone        *time.Location `json:"timeZone" yaml:"timeZone"`
-	Comment         string       `json:"comment" yaml:"comment"`
-	Collation       string       `json:"collation" yaml:"collation"`
+	Comment         string         `json:"comment" yaml:"comment"`
+	Collation       string         `json:"collation" yaml:"collation"`
 }
 
 func NewColumn(name, fieldName string, sqlType SQLType, len1, len2 int64, nullable bool) *Column {
