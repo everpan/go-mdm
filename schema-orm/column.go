@@ -18,32 +18,32 @@ const (
 // and the same field names /types.
 type Column struct {
 	Name            string         `json:"name" yaml:"name"`
-	TableName       string         `json:"tableName" yaml:"tableName"`
-	FieldName       string         `json:"fieldName" yaml:"fieldName"`
-	FieldIndex      []int          `json:"fieldIndex" yaml:"fieldIndex"`
+	TableName       string         `json:"tableName,omitempty" yaml:"tableName,omitempty"`
+	FieldName       string         `json:"fieldName,omitempty" yaml:"fieldName,omitempty"`
+	FieldIndex      []int          `json:"fieldIndex,omitempty" yaml:"fieldIndex,omitempty"`
 	SQLType         SQLType        `json:"sqlType" yaml:"sqlType"`
-	IsJSON          bool           `json:"isJSON" yaml:"isJSON"`
-	IsJSONB         bool           `json:"isJSONB" yaml:"isJSONB"`
-	Length          int64          `json:"length" yaml:"length"`
-	Length2         int64          `json:"length2" yaml:"length2"`
-	Nullable        bool           `json:"nullable" yaml:"nullable"`
-	Default         string         `json:"default" yaml:"default"`
-	Indexes         map[string]int `json:"indexes" yaml:"indexes"`
-	IsPrimaryKey    bool           `json:"isPrimaryKey" yaml:"isPrimaryKey"`
-	IsAutoIncrement bool           `json:"isAutoIncrement" yaml:"isAutoIncrement"`
-	MapType         int            `json:"mapType" yaml:"mapType"`
-	IsCreated       bool           `json:"isCreated" yaml:"isCreated"`
-	IsUpdated       bool           `json:"isUpdated" yaml:"isUpdated"`
-	IsDeleted       bool           `json:"isDeleted" yaml:"isDeleted"`
-	IsCascade       bool           `json:"isCascade" yaml:"isCascade"`
-	IsVersion       bool           `json:"isVersion" yaml:"isVersion"`
-	DefaultIsEmpty  bool           `json:"defaultIsEmpty" yaml:"defaultIsEmpty"`
-	EnumOptions     map[string]int `json:"enumOptions" yaml:"enumOptions"`
-	SetOptions      map[string]int `json:"setOptions" yaml:"setOptions"`
-	DisableTimeZone bool           `json:"disableTimeZone" yaml:"disableTimeZone"`
-	TimeZone        *time.Location `json:"timeZone" yaml:"timeZone"`
-	Comment         string         `json:"comment" yaml:"comment"`
-	Collation       string         `json:"collation" yaml:"collation"`
+	IsJSON          bool           `json:"isJSON,omitempty" yaml:"isJSON,omitempty"`
+	IsJSONB         bool           `json:"isJSONB,omitempty" yaml:"isJSONB,omitempty"`
+	Length          int64          `json:"length,omitempty" yaml:"length,omitempty"`
+	Length2         int64          `json:"length2,omitempty" yaml:"length2,omitempty"`
+	Nullable        bool           `json:"nullable,omitempty" yaml:"nullable,omitempty"`
+	Default         string         `json:"default,omitempty" yaml:"default,omitempty"`
+	Indexes         map[string]int `json:"indexes,omitempty" yaml:"indexes,omitempty"`
+	IsPrimaryKey    bool           `json:"isPrimaryKey,omitempty" yaml:"isPrimaryKey,omitempty"`
+	IsAutoIncrement bool           `json:"isAutoIncrement,omitempty" yaml:"isAutoIncrement,omitempty"`
+	MapType         int            `json:"mapType,omitempty" yaml:"mapType,omitempty"`
+	IsCreated       bool           `json:"isCreated,omitempty" yaml:"isCreated,omitempty"`
+	IsUpdated       bool           `json:"isUpdated,omitempty" yaml:"isUpdated,omitempty"`
+	IsDeleted       bool           `json:"isDeleted,omitempty" yaml:"isDeleted,omitempty"`
+	IsCascade       bool           `json:"isCascade,omitempty" yaml:"isCascade,omitempty"`
+	IsVersion       bool           `json:"isVersion,omitempty" yaml:"isVersion,omitempty"`
+	DefaultIsEmpty  bool           `json:"defaultIsEmpty,omitempty" yaml:"defaultIsEmpty,omitempty"`
+	EnumOptions     map[string]int `json:"enumOptions,omitempty" yaml:"enumOptions,omitempty"`
+	SetOptions      map[string]int `json:"setOptions,omitempty" yaml:"setOptions,omitempty"`
+	DisableTimeZone bool           `json:"disableTimeZone,omitempty" yaml:"disableTimeZone,omitempty"`
+	TimeZone        *time.Location `json:"timeZone,omitempty" yaml:"timeZone,omitempty"`
+	Comment         string         `json:"comment,omitempty" yaml:"comment,omitempty"`
+	Collation       string         `json:"collation,omitempty" yaml:"collation,omitempty"`
 }
 
 func NewColumn(name, fieldName string, sqlType SQLType, len1, len2 int64, nullable bool) *Column {

@@ -14,17 +14,17 @@ type Table struct {
 	columnsSeq    []string             `json:"columnsSeq" yaml:"columnsSeq"`
 	columnsMap    map[string][]*Column `json:"columnsMap" yaml:"columnsMap"`
 	columns       []*Column            `json:"columns" yaml:"columns"`
-	Indexes       map[string]*Index    `json:"indexes" yaml:"indexes"`
-	PrimaryKeys   []string             `json:"primaryKeys" yaml:"primaryKeys"`
-	AutoIncrement string               `json:"autoIncrement" yaml:"autoIncrement"`
-	Created       map[string]bool      `json:"created" yaml:"created"`
-	Updated       string               `json:"updated" yaml:"updated"`
-	Deleted       string               `json:"deleted" yaml:"deleted"`
-	Version       string               `json:"version" yaml:"version"`
-	StoreEngine   string               `json:"storeEngine" yaml:"storeEngine"`
-	Charset       string               `json:"charset" yaml:"charset"`
-	Comment       string               `json:"comment" yaml:"comment"`
-	Collation     string               `json:"collation" yaml:"collation"`
+	Indexes       map[string]*Index    `json:"indexes,omitempty" yaml:"indexes,omitempty"`
+	PrimaryKeys   []string             `json:"primaryKeys,omitempty" yaml:"primaryKeys,omitempty"`
+	AutoIncrement string               `json:"autoIncrement,omitempty" yaml:"autoIncrement,omitempty"`
+	Created       map[string]bool      `json:"created,omitempty" yaml:"created,omitempty"`
+	Updated       string               `json:"updated,omitempty" yaml:"updated,omitempty"`
+	Deleted       string               `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Version       string               `json:"version,omitempty" yaml:"version,omitempty"`
+	StoreEngine   string               `json:"storeEngine,omitempty" yaml:"storeEngine,omitempty"`
+	Charset       string               `json:"charset,omitempty" yaml:"charset,omitempty"`
+	Comment       string               `json:"comment,omitempty" yaml:"comment,omitempty"`
+	Collation     string               `json:"collation,omitempty" yaml:"collation,omitempty"`
 }
 
 func NewEmptyTable() *Table { return NewTable("", nil) }
@@ -135,5 +135,5 @@ func (table *Table) IDOfV(rv reflect.Value) (PK, error) {
 			return nil, err
 		}
 	}
-	return PK(pk), nil
+	return pk, nil
 }

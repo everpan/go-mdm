@@ -6,23 +6,23 @@ import (
 )
 
 // DBType mirrors xorm.io/xorm/schemas.DBType
-// Tags are added though this is a type alias.
+// Tags are added, though this is a type alias.
 type DBType string
 
 // SQLType mirrors xorm.io/xorm/schemas.SQLType with JSON/YAML tags
 // and helper methods copied one-to-one.
 type SQLType struct {
 	Name           string `json:"name" yaml:"name"`
-	DefaultLength  int64  `json:"defaultLength" yaml:"defaultLength"`
-	DefaultLength2 int64  `json:"defaultLength2" yaml:"defaultLength2"`
+	DefaultLength  int64  `json:"defaultLength,omitempty" yaml:"defaultLength,omitempty"`
+	DefaultLength2 int64  `json:"defaultLength2,omitempty" yaml:"defaultLength2,omitempty"`
 }
 
 // kinds for detection (copied behaviorally from upstream)
 const (
-	// Text/blob/time/bool/numeric/array/json/xml are represented via Name matching.
+// Text/blob/time/bool/numeric/array/json/xml are represented via Name matching.
 )
 
-// Below helper methods mirror upstream behavior but simplified to string matching.
+// IsType Below helper methods mirror upstream behavior but simplified to string matching.
 func (s *SQLType) IsType(st int) bool { // not used in our scope but kept for parity
 	return false
 }
