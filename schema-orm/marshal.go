@@ -187,7 +187,7 @@ func (table *Table) UnmarshalYAML(value *yaml.Node) error {
 	return nil
 }
 
-// PK JSON/YAML
+// MarshalJSON PK JSON/YAML
 func (p *PK) MarshalJSON() ([]byte, error) { return json.Marshal(pkAlias(*p)) }
 func (p *PK) UnmarshalJSON(b []byte) error {
 	var a pkAlias
