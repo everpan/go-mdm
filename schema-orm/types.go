@@ -22,11 +22,6 @@ const (
 // Text/blob/time/bool/numeric/array/json/xml are represented via Name matching.
 )
 
-// IsType Below helper methods mirror upstream behavior but simplified to string matching.
-func (s *SQLType) IsType(st int) bool { // not used in our scope but kept for parity
-	return false
-}
-
 func (s *SQLType) IsText() bool {
 	// minimal set
 	switch strings.ToUpper(s.Name) {
@@ -77,7 +72,7 @@ func (s *SQLType) IsXML() bool {
 	return strings.ToUpper(s.Name) == "XML"
 }
 
-// Utilities mirrored from upstream type.go for conversions kept minimal
+// Type2SQLType Utilities mirrored from upstream type.go for conversions kept minimal
 func Type2SQLType(t reflect.Type) (st SQLType) {
 	// very simplified mapping for tests
 	if t == nil {
@@ -97,6 +92,10 @@ func Type2SQLType(t reflect.Type) (st SQLType) {
 		if t.Elem().Kind() == reflect.Uint8 {
 			return SQLType{Name: "BLOB"}
 		}
+	case reflect.Struct:
+		return SQLType{Name: "JSON"}
+	default:
+		panic("unhandled default case")
 	}
 	return SQLType{Name: "TEXT"}
 }

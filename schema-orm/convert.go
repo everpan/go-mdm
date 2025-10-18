@@ -84,7 +84,7 @@ func FromXormColumn(c *xs.Column) *Column {
 	}
 }
 
-// Index conversions
+// ToXormIndex Index conversions
 func ToXormIndex(i *Index) *xs.Index {
 	if i == nil {
 		return nil
@@ -98,7 +98,7 @@ func FromXormIndex(i *xs.Index) *Index {
 	return &Index{IsRegular: i.IsRegular, Name: i.Name, Type: i.Type, Cols: append([]string(nil), i.Cols...)}
 }
 
-// PK conversions
+// ToXormPK PK conversions
 func ToXormPK(p PK) xs.PK {
 	out := make(xs.PK, len(p))
 	copy(out, p)
@@ -110,7 +110,7 @@ func FromXormPK(p xs.PK) PK {
 	return out
 }
 
-// Table conversions (Type cannot be fully mapped via JSON, keep reflect.Type as-is)
+// ToXormTable Table conversions (Type cannot be fully mapped via JSON, keep reflection.Type as-is)
 func ToXormTable(t *Table) *xs.Table {
 	if t == nil {
 		return nil
@@ -125,14 +125,14 @@ func ToXormTable(t *Table) *xs.Table {
 	x.Comment = t.Comment
 	x.Collation = t.Collation
 	// columns
-	for _, c := range t.columns {
+	for _, c := range t.Columns {
 		x.AddColumn(ToXormColumn(c))
 	}
-	// indexes map must be filled
+	// the index map must be filled
 	for k, v := range t.Indexes {
 		x.Indexes[k] = ToXormIndex(v)
 	}
-	// created map
+	// created a map
 	for k, v := range t.Created {
 		x.Created[k] = v
 	}

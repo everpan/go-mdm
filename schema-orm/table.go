@@ -11,9 +11,9 @@ import (
 type Table struct {
 	Name          string               `json:"name" yaml:"name"`
 	Type          reflect.Type         `json:"-" yaml:"-"`
-	columnsSeq    []string             `json:"columnsSeq" yaml:"columnsSeq"`
-	columnsMap    map[string][]*Column `json:"columnsMap" yaml:"columnsMap"`
-	columns       []*Column            `json:"columns" yaml:"columns"`
+	ColumnsSeq    []string             `json:"ColumnsSeq" yaml:"ColumnsSeq"`
+	ColumnsMap    map[string][]*Column `json:"columnsMap" yaml:"columnsMap"`
+	Columns       []*Column            `json:"columns" yaml:"columns"`
 	Indexes       map[string]*Index    `json:"indexes,omitempty" yaml:"indexes,omitempty"`
 	PrimaryKeys   []string             `json:"primaryKeys,omitempty" yaml:"primaryKeys,omitempty"`
 	AutoIncrement string               `json:"autoIncrement,omitempty" yaml:"autoIncrement,omitempty"`
@@ -33,20 +33,17 @@ func NewTable(name string, t reflect.Type) *Table {
 	return &Table{
 		Name:        name,
 		Type:        t,
-		columnsSeq:  make([]string, 0),
-		columns:     make([]*Column, 0),
-		columnsMap:  make(map[string][]*Column),
+		ColumnsSeq:  make([]string, 0),
+		Columns:     make([]*Column, 0),
+		ColumnsMap:  make(map[string][]*Column),
 		Indexes:     make(map[string]*Index),
 		Created:     make(map[string]bool),
 		PrimaryKeys: make([]string, 0),
 	}
 }
 
-func (table *Table) Columns() []*Column   { return table.columns }
-func (table *Table) ColumnsSeq() []string { return table.columnsSeq }
-
 func (table *Table) columnsByName(name string) []*Column {
-	return table.columnsMap[strings.ToLower(name)]
+	return table.ColumnsMap[strings.ToLower(name)]
 }
 
 func (table *Table) GetColumn(name string) *Column {
@@ -84,13 +81,13 @@ func (table *Table) UpdatedColumn() *Column  { return table.GetColumn(table.Upda
 func (table *Table) DeletedColumn() *Column  { return table.GetColumn(table.Deleted) }
 
 func (table *Table) AddColumn(col *Column) {
-	table.columnsSeq = append(table.columnsSeq, col.Name)
-	table.columns = append(table.columns, col)
+	table.ColumnsSeq = append(table.ColumnsSeq, col.Name)
+	table.Columns = append(table.Columns, col)
 	colName := strings.ToLower(col.Name)
-	if c, ok := table.columnsMap[colName]; ok {
-		table.columnsMap[colName] = append(c, col)
+	if c, ok := table.ColumnsMap[colName]; ok {
+		table.ColumnsMap[colName] = append(c, col)
 	} else {
-		table.columnsMap[colName] = []*Column{col}
+		table.ColumnsMap[colName] = []*Column{col}
 	}
 
 	if col.IsPrimaryKey {

@@ -14,8 +14,6 @@ type columnAlias Column
 
 type indexAlias Index
 
-type tableAlias Table
-
 type pkAlias PK
 
 // MarshalJSON SQLType JSON/YAML
@@ -100,8 +98,8 @@ type tableDTO struct {
 func (table *Table) MarshalJSON() ([]byte, error) {
 	d := tableDTO{
 		Name:          table.Name,
-		ColumnsSeq:    append([]string(nil), table.columnsSeq...),
-		Columns:       append([]*Column(nil), table.columns...),
+		ColumnsSeq:    append([]string(nil), table.ColumnsSeq...),
+		Columns:       append([]*Column(nil), table.Columns...),
 		Indexes:       table.Indexes,
 		PrimaryKeys:   append([]string(nil), table.PrimaryKeys...),
 		AutoIncrement: table.AutoIncrement,
@@ -123,7 +121,7 @@ func (table *Table) UnmarshalJSON(b []byte) error {
 		return err
 	}
 	nt := NewTable(d.Name, nil)
-	nt.columnsSeq = append(nt.columnsSeq, d.ColumnsSeq...)
+	nt.ColumnsSeq = append(nt.ColumnsSeq, d.ColumnsSeq...)
 	for _, c := range d.Columns {
 		nt.AddColumn(c)
 	}
@@ -145,8 +143,8 @@ func (table *Table) UnmarshalJSON(b []byte) error {
 func (table *Table) MarshalYAML() (interface{}, error) {
 	d := tableDTO{
 		Name:          table.Name,
-		ColumnsSeq:    append([]string(nil), table.columnsSeq...),
-		Columns:       append([]*Column(nil), table.columns...),
+		ColumnsSeq:    append([]string(nil), table.ColumnsSeq...),
+		Columns:       append([]*Column(nil), table.Columns...),
 		Indexes:       table.Indexes,
 		PrimaryKeys:   append([]string(nil), table.PrimaryKeys...),
 		AutoIncrement: table.AutoIncrement,
@@ -168,7 +166,7 @@ func (table *Table) UnmarshalYAML(value *yaml.Node) error {
 		return err
 	}
 	nt := NewTable(d.Name, nil)
-	nt.columnsSeq = append(nt.columnsSeq, d.ColumnsSeq...)
+	nt.ColumnsSeq = append(nt.ColumnsSeq, d.ColumnsSeq...)
 	for _, c := range d.Columns {
 		nt.AddColumn(c)
 	}

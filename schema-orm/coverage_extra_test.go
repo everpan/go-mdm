@@ -12,10 +12,6 @@ type sample2 struct {
 	UID uint
 }
 
-type blobHolder struct{ B []byte }
-
-type boolHolder struct{ V bool }
-
 func TestPK_isZero_VariousTypes(t *testing.T) {
 	if !isZero(nil) {
 		t.Fatalf("nil should be zero")
@@ -78,9 +74,9 @@ func TestTypes_Type2SQLType_MoreKinds(t *testing.T) {
 	if Type2SQLType(reflect.TypeOf(float64(0))).Name != "FLOAT" {
 		t.Fatalf("float mapping")
 	}
-	// default mapping for struct goes to TEXT in simplified impl
+	// default mapping for the struct goes to TEXT in simplified impl
 	type S struct{ A int }
-	if Type2SQLType(reflect.TypeOf(S{})).Name != "TEXT" {
+	if Type2SQLType(reflect.TypeOf(S{})).Name != "JSON" {
 		t.Fatalf("default struct mapping")
 	}
 }
@@ -166,7 +162,7 @@ func TestConvert_Table_MapsAndIndexesFilled(t *testing.T) {
 	}
 	// back
 	b := FromXormTable(x)
-	if len(b.Columns()) != 1 || len(b.Indexes) != 1 || !b.Created["ID"] {
+	if len(b.Columns) != 1 || len(b.Indexes) != 1 || !b.Created["ID"] {
 		t.Fatalf("round conversion failed")
 	}
 }
