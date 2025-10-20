@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 	"xorm.io/xorm"
 )
 
@@ -19,6 +20,22 @@ func BuildMySQLDSN(host, user, password, db string) string {
 		addr = fmt.Sprintf("%s:3306", addr)
 	}
 	return fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", user, password, addr, db)
+}
+
+// BuildPostgresDSN builds a standard PostgreSQL DSN for xorm/postgres driver.
+// Example: postgres://user:pass@localhost:5432/postgres?sslmode=disable
+func BuildPostgresDSN(host, user, password, db string) string {
+	addr := host
+	if addr == "" {
+		addr = "localhost:5432"
+	} else if !containsPort(addr) {
+		addr = fmt.Sprintf("%s:5432", addr)
+	}
+	// Prefer URL form for lib/pq
+	if password == "" {
+		return fmt.Sprintf("postgres://%s@%s/%s?sslmode=disable", user, addr, db)
+	}
+	return fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", user, password, addr, db)
 }
 
 func containsPort(h string) bool {
@@ -69,6 +86,45 @@ func ExportMySQLSchemaToJSONWithDSN(dsn string) (string, error) {
 	}
 
 	// b, err := json.MarshalIndent(out, "", "  ")
+	b, err := json.Marshal(out)
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
+}
+
+// ExportPostgresToJSON connects to PostgreSQL via xorm Engine, introspects the database schema,
+// converts to schema-orm structures, and returns the JSON string.
+// host example: "localhost" or "localhost:5432"
+// user example: "ever"
+// db example: "postgres"
+func ExportPostgresToJSON(host, user, password, db string) (string, error) {
+	dsn := BuildPostgresDSN(host, user, password, db)
+	return ExportPostgresSchemaToJSONWithDSN(dsn)
+}
+
+// ExportPostgresSchemaToJSONWithDSN does the same as ExportPostgresToJSON but accepts a DSN directly.
+func ExportPostgresSchemaToJSONWithDSN(dsn string) (string, error) {
+	engine, err := xorm.NewEngine("postgres", dsn)
+	if err != nil {
+		return "", err
+	}
+	defer engine.Close()
+
+	if err := engine.Ping(); err != nil {
+		return "", err
+	}
+
+	metas, err := engine.DBMetas()
+	if err != nil {
+		return "", err
+	}
+
+	out := make([]*Table, 0, len(metas))
+	for _, xt := range metas {
+		out = append(out, FromXormTable(xt))
+	}
+
 	b, err := json.Marshal(out)
 	if err != nil {
 		return "", err

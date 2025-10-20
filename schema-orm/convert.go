@@ -46,6 +46,10 @@ func ToXormColumn(c *Column) *xs.Column {
 		Comment:         c.Comment,
 		Collation:       c.Collation,
 	}
+	if xc.SQLType.Name == "BIT" {
+		xc.SQLType.Name = "BOOL"
+		xc.Default = "true"
+	}
 	return xc
 }
 
