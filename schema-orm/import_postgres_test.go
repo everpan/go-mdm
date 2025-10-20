@@ -1,3 +1,5 @@
+//go:build integration
+
 package schema_orm
 
 import (
@@ -13,6 +15,13 @@ import (
 )
 
 func TestImportTablesFromJSON_File(t *testing.T) {
+	// This test requires a running local PostgreSQL instance. Skip unless explicitly enabled.
+	if os.Getenv("WIZ_PG_DSN") == "" {
+		// Allow enabling via WIZ_PG_ENABLE=1 without full DSN; build a local DSN then.
+		if os.Getenv("WIZ_PG_ENABLE") == "" {
+			t.Skip("skip: no PostgreSQL available (set WIZ_PG_DSN or WIZ_PG_ENABLE=1 to run)")
+		}
+	}
 	// Load the bundled sample schema.json if present
 	p := filepath.Join("", "schema.json")
 	b, err := os.ReadFile(p)
