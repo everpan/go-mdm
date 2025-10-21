@@ -75,7 +75,7 @@ func NewHertz(script string) *server.Hertz {
 			ctx.Response.Header.Set(k, v)
 		}
 		if resp.Body.Len() > 0 {
-			// Copy to avoid referencing internal buffer beyond handler lifetime
+			// Copy to avoid referencing the internal buffer beyond handler lifetime
 			ctx.Response.SetBody(bytes.Clone(resp.Body.Bytes()))
 		}
 	})
