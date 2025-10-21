@@ -57,67 +57,21 @@ func BindAllMethods(rt *goja.Runtime, target any) *goja.Object {
 			args := make([]reflect.Value, 0, inTotal)
 			args = append(args, val)
 			// Fixed params
-			for pi := 1; pi <= fixedParams; pi++ {
-				pt := mt.In(pi)
-				// Create a zero-value pointer to use ExportTo
-				argPtr := reflect.New(pt)
-				gojaVal := call.Arguments[pi-1]
-				if err := rt.ExportTo(gojaVal, argPtr.Interface()); err != nil {
-					// Fallback: try using the generic Export and Convert if types are compatible
-					exported := gojaVal.Export()
-					a, convOK := tryConvert(exported, pt)
-					if !convOK {
-						panic(rt.NewTypeError("convert argument %d for %s failed: %v", pi-1, name, err))
-					}
-					args = append(args, a)
-					continue
-				}
-				args = append(args, argPtr.Elem())
-			}
+			fixed := buildFixedArgs(rt, call, mt, fixedParams, name)
+			args = append(args, fixed...)
 
-			// Variadic
+			// Call
 			var results []reflect.Value
 			if isVar {
 				sliceT := mt.In(inTotal - 1)
 				elemT := sliceT.Elem()
-				nVar := len(call.Arguments) - fixedParams
-				slice := reflect.MakeSlice(sliceT, 0, nVar)
-				// If a single JS array is passed for varargs, expand it
-				if nVar == 1 {
-					if obj, ok := call.Arguments[fixedParams].Export().([]interface{}); ok {
-						for _, it := range obj {
-							v, ok := tryConvert(it, elemT)
-							if !ok {
-								panic(rt.NewTypeError("convert variadic element for %s failed", name))
-							}
-							slice = reflect.Append(slice, v)
-						}
-						args = append(args, slice)
-						results = meth.Func.CallSlice(args)
-						goto AFTER_CALL
-					}
-				}
-				for i := fixedParams; i < len(call.Arguments); i++ {
-					elPtr := reflect.New(elemT)
-					gv := call.Arguments[i]
-					if err := rt.ExportTo(gv, elPtr.Interface()); err != nil {
-						exported := gv.Export()
-						v, ok := tryConvert(exported, elemT)
-						if !ok {
-							panic(rt.NewTypeError("convert variadic element for %s failed: %v", name, err))
-						}
-						slice = reflect.Append(slice, v)
-					} else {
-						slice = reflect.Append(slice, elPtr.Elem())
-					}
-				}
+				slice := buildVariadicSlice(rt, call, fixedParams, sliceT, elemT, name)
 				args = append(args, slice)
 				results = meth.Func.CallSlice(args)
 			} else {
-				// Call method
 				results = meth.Func.Call(args)
 			}
-		AFTER_CALL:
+
 			n := len(results)
 			if n == 0 {
 				return goja.Undefined()
@@ -188,7 +142,7 @@ func RegisterXORM(rt *goja.Runtime) error {
 	return rt.Set("xorm", creator)
 }
 
-// trailingErrorType checks if the last return type is error.
+// trailingErrorType checks if the last return type is an error.
 func ternary(cond bool, a, b string) string {
 	if cond {
 		return a
@@ -206,6 +160,62 @@ func trailingErrorType(mt reflect.Type) (reflect.Type, bool) {
 		return last, true
 	}
 	return nil, false
+}
+
+// buildFixedArgs converts fixed (non-variadic) arguments for a reflected method type.
+// It panics with a JS TypeError on conversion failure to match existing caller behavior.
+func buildFixedArgs(rt *goja.Runtime, call goja.FunctionCall, mt reflect.Type, fixedParams int, name string) []reflect.Value {
+	fixed := make([]reflect.Value, 0, fixedParams)
+	for pi := 1; pi <= fixedParams; pi++ {
+		pt := mt.In(pi)
+		argPtr := reflect.New(pt)
+		gojaVal := call.Arguments[pi-1]
+		if err := rt.ExportTo(gojaVal, argPtr.Interface()); err != nil {
+			exported := gojaVal.Export()
+			v, ok := tryConvert(exported, pt)
+			if !ok {
+				panic(rt.NewTypeError("convert argument %d for %s failed: %v", pi-1, name, err))
+			}
+			fixed = append(fixed, v)
+			continue
+		}
+		fixed = append(fixed, argPtr.Elem())
+	}
+	return fixed
+}
+
+// buildVariadicSlice constructs the slice value for a variadic parameter.
+// Supports the special case where a single JS array is provided for the varargs.
+func buildVariadicSlice(rt *goja.Runtime, call goja.FunctionCall, fixedParams int, sliceT, elemT reflect.Type, name string) reflect.Value {
+	nVar := len(call.Arguments) - fixedParams
+	slice := reflect.MakeSlice(sliceT, 0, nVar)
+	if nVar == 1 {
+		if arr, ok := call.Arguments[fixedParams].Export().([]interface{}); ok {
+			for _, it := range arr {
+				v, ok := tryConvert(it, elemT)
+				if !ok {
+					panic(rt.NewTypeError("convert variadic element for %s failed", name))
+				}
+				slice = reflect.Append(slice, v)
+			}
+			return slice
+		}
+	}
+	for i := fixedParams; i < len(call.Arguments); i++ {
+		elPtr := reflect.New(elemT)
+		gv := call.Arguments[i]
+		if err := rt.ExportTo(gv, elPtr.Interface()); err != nil {
+			exported := gv.Export()
+			v, ok := tryConvert(exported, elemT)
+			if !ok {
+				panic(rt.NewTypeError("convert variadic element for %s failed: %v", name, err))
+			}
+			slice = reflect.Append(slice, v)
+		} else {
+			slice = reflect.Append(slice, elPtr.Elem())
+		}
+	}
+	return slice
 }
 
 // tryConvert attempts a best-effort conversion from an exported interface{} to the target type.
@@ -250,7 +260,7 @@ func tryConvert(v any, t reflect.Type) (reflect.Value, bool) {
 
 // Sentinel errors for testability
 
-// BindXORMProxy creates a JS object that exposes all exported methods of *xorm.Engine,
+// BindXORMProxy creates a JS object that exposes all exported methods of *xorm.Engine
 // but dispatches each call to whatever current engine instance is installed via the returned setter.
 // This allows swapping the underlying engine without re-binding the JS object.
 func BindXORMProxy(rt *goja.Runtime) (*goja.Object, func(*xorm.Engine)) {
@@ -285,75 +295,17 @@ func BindXORMProxy(rt *goja.Runtime) (*goja.Object, func(*xorm.Engine)) {
 			rev := reflect.ValueOf(current)
 			args := make([]reflect.Value, 0, inTotal)
 			args = append(args, rev)
-			for pi := 1; pi <= fixedParams; pi++ {
-				pt := mt.In(pi)
-				argPtr := reflect.New(pt)
-				gv := call.Arguments[pi-1]
-				if err := rt.ExportTo(gv, argPtr.Interface()); err != nil {
-					exported := gv.Export()
-					v, ok := tryConvert(exported, pt)
-					if !ok {
-						panic(rt.NewTypeError("convert argument %d for %s failed: %v", pi-1, name, err))
-					}
-					args = append(args, v)
-					continue
-				}
-				args = append(args, argPtr.Elem())
-			}
+			// Fixed params via shared helper
+			fixed := buildFixedArgs(rt, call, mt, fixedParams, name)
+			args = append(args, fixed...)
 
 			var results []reflect.Value
 			if isVar {
 				sliceT := mt.In(inTotal - 1)
 				elemT := sliceT.Elem()
-				nVar := len(call.Arguments) - fixedParams
-				slice := reflect.MakeSlice(sliceT, 0, nVar)
-				if nVar == 1 {
-					if arr, ok := call.Arguments[fixedParams].Export().([]interface{}); ok {
-						for _, it := range arr {
-							v, ok := tryConvert(it, elemT)
-							if !ok {
-								panic(rt.NewTypeError("convert variadic element for %s failed", name))
-							}
-							slice = reflect.Append(slice, v)
-						}
-						args = append(args, slice)
-						results = meth.Func.CallSlice(args)
-					} else {
-						for i := fixedParams; i < len(call.Arguments); i++ {
-							elPtr := reflect.New(elemT)
-							gv := call.Arguments[i]
-							if err := rt.ExportTo(gv, elPtr.Interface()); err != nil {
-								exported := gv.Export()
-								v, ok := tryConvert(exported, elemT)
-								if !ok {
-									panic(rt.NewTypeError("convert variadic element for %s failed: %v", name, err))
-								}
-								slice = reflect.Append(slice, v)
-							} else {
-								slice = reflect.Append(slice, elPtr.Elem())
-							}
-						}
-						args = append(args, slice)
-						results = meth.Func.CallSlice(args)
-					}
-				} else {
-					for i := fixedParams; i < len(call.Arguments); i++ {
-						elPtr := reflect.New(elemT)
-						gv := call.Arguments[i]
-						if err := rt.ExportTo(gv, elPtr.Interface()); err != nil {
-							exported := gv.Export()
-							v, ok := tryConvert(exported, elemT)
-							if !ok {
-								panic(rt.NewTypeError("convert variadic element for %s failed: %v", name, err))
-							}
-							slice = reflect.Append(slice, v)
-						} else {
-							slice = reflect.Append(slice, elPtr.Elem())
-						}
-					}
-					args = append(args, slice)
-					results = meth.Func.CallSlice(args)
-				}
+				slice := buildVariadicSlice(rt, call, fixedParams, sliceT, elemT, name)
+				args = append(args, slice)
+				results = meth.Func.CallSlice(args)
 			} else {
 				results = meth.Func.Call(args)
 			}
