@@ -8,12 +8,6 @@ import (
 	"xorm.io/xorm"
 )
 
-// NewXORM creates a new xorm Engine using the given driver and DSN.
-// It is a light wrapper that keeps the utils package self-contained for tests.
-func NewXORM(driver, dsn string) (*xorm.Engine, error) {
-	return xorm.NewEngine(driver, dsn)
-}
-
 // BindAllMethods exposes all exported methods of the target (usually *xorm.Engine)
 // as functions on a new JavaScript object. Methods are invoked via reflection.
 //
